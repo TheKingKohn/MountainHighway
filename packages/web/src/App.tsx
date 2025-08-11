@@ -46,6 +46,11 @@ function App() {
     }
 
     checkApiHealth()
+    
+    // Handle hash-based routing for admin
+    if (window.location.hash === '#/admin') {
+      window.location.href = '/admin';
+    }
   }, [])
 
   return (
