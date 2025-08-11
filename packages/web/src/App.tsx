@@ -19,6 +19,7 @@ function Navigation() {
       <Link to="/">Home</Link>
       <Link to="/listings">Listings</Link>
       {user && <Link to="/create-listing">Create Listing</Link>}
+      {user && <Link to="/community">Community</Link>}
       {isAdmin && <Link to="/admin">Admin Panel</Link>}
       <Link to="/about">About</Link>
     </nav>
@@ -87,6 +88,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/listings" element={<ListingsPage />} />
               <Route path="/create-listing" element={<CreateListing />} />
+              <Route path="/community" element={<Community />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<Home />} />
@@ -142,7 +144,7 @@ function Home() {
         {/* Welcome Banner with Social Proof */}
         <div className="welcome-banner">
           <h1>Mountain Highway</h1>
-          <p>Join 2,500+ outdoor enthusiasts buying & selling gear locally</p>
+          <p>Join 2,500+ members buying & selling locally</p>
           <div className="trust-indicators">
             <span className="trust-badge">🔒 Secure</span>
             <span className="trust-badge">⚡ Fast</span>
@@ -154,34 +156,34 @@ function Home() {
         <div className="categories-section">
           <h2>Shop by Category</h2>
           <div className="categories-grid">
-            <Link to="/listings?category=hiking" className="category-item">
-              <div className="category-icon">🥾</div>
-              <span>Hiking</span>
+            <Link to="/listings?category=electronics" className="category-item">
+              <div className="category-icon">📱</div>
+              <span>Electronics</span>
               <div className="category-indicator hot">🔥 Hot</div>
             </Link>
-            <Link to="/listings?category=camping" className="category-item">
-              <div className="category-icon">⛺</div>
-              <span>Camping</span>
-              <div className="category-indicator">25+ items</div>
+            <Link to="/listings?category=fashion" className="category-item">
+              <div className="category-icon">👕</div>
+              <span>Fashion</span>
+              <div className="category-indicator">32+ items</div>
             </Link>
-            <Link to="/listings?category=climbing" className="category-item">
-              <div className="category-icon">🧗</div>
-              <span>Climbing</span>
+            <Link to="/listings?category=home" className="category-item">
+              <div className="category-icon">🏠</div>
+              <span>Home & Garden</span>
               <div className="category-indicator new">✨ New</div>
             </Link>
-            <Link to="/listings?category=biking" className="category-item">
-              <div className="category-icon">🚴</div>
-              <span>Biking</span>
-              <div className="category-indicator">18+ items</div>
+            <Link to="/listings?category=collectibles" className="category-item">
+              <div className="category-icon">🎨</div>
+              <span>Collectibles</span>
+              <div className="category-indicator">15+ items</div>
             </Link>
-            <Link to="/listings?category=water" className="category-item">
-              <div className="category-icon">🏄</div>
-              <span>Water Sports</span>
-              <div className="category-indicator">12+ items</div>
+            <Link to="/listings?category=automotive" className="category-item">
+              <div className="category-icon">🚗</div>
+              <span>Automotive</span>
+              <div className="category-indicator">8+ items</div>
             </Link>
-            <Link to="/listings?category=winter" className="category-item">
-              <div className="category-icon">⛷️</div>
-              <span>Winter</span>
+            <Link to="/listings?category=services" className="category-item">
+              <div className="category-icon">🛠️</div>
+              <span>Services</span>
               <div className="category-indicator limited">⏰ Limited</div>
             </Link>
           </div>
@@ -197,16 +199,16 @@ function Home() {
             <div className="preview-card">
               <div className="preview-image">📷</div>
               <div className="preview-info">
-                <h3>Premium Backpack</h3>
-                <p>$99 <span className="was-price">was $150</span></p>
+                <h3>iPhone 14 Pro</h3>
+                <p>$650 <span className="was-price">was $899</span></p>
                 <div className="urgency">⏰ 3 people watching</div>
               </div>
             </div>
             <div className="preview-card">
               <div className="preview-image">📷</div>
               <div className="preview-info">
-                <h3>Climbing Gear Set</h3>
-                <p>$149</p>
+                <h3>Vintage Leather Jacket</h3>
+                <p>$85</p>
                 <div className="urgency">🔥 Just listed</div>
               </div>
             </div>
@@ -255,8 +257,113 @@ function Home() {
 function About() {
   return (
     <div>
-      <h2>About</h2>
-      <p>Mountain Highway connects outdoor enthusiasts through a trusted marketplace.</p>
+      <h2>About Mountain Highway</h2>
+      <p>Mountain Highway is your local exclusive marketplace where community matters. Connect with trusted members, discover unique items, and build lasting relationships.</p>
+    </div>
+  )
+}
+
+function Community() {
+  const { user } = useAuth()
+  
+  if (!user) {
+    return (
+      <div className="community-page">
+        <h2>Community</h2>
+        <p>Please sign in to access the community features.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="community-page">
+      <h2>🌟 Community Hub</h2>
+      
+      {/* Community Stats */}
+      <div className="community-stats">
+        <div className="stat-card">
+          <div className="stat-number">2,500+</div>
+          <div className="stat-label">Active Members</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">850+</div>
+          <div className="stat-label">Items Sold</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">98%</div>
+          <div className="stat-label">Satisfaction</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="community-actions">
+        <h3>Connect & Share</h3>
+        <div className="action-grid">
+          <div className="action-card">
+            <div className="action-icon">💬</div>
+            <h4>General Chat</h4>
+            <p>Connect with other members</p>
+            <button className="action-btn">Join Chat</button>
+          </div>
+          <div className="action-card">
+            <div className="action-icon">🤝</div>
+            <h4>Trade Requests</h4>
+            <p>Looking for something specific?</p>
+            <button className="action-btn">Post Request</button>
+          </div>
+          <div className="action-card">
+            <div className="action-icon">⭐</div>
+            <h4>Member Reviews</h4>
+            <p>Share your experience</p>
+            <button className="action-btn">Write Review</button>
+          </div>
+          <div className="action-card">
+            <div className="action-icon">📍</div>
+            <h4>Local Events</h4>
+            <p>Meet up with members nearby</p>
+            <button className="action-btn">View Events</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="recent-activity">
+        <h3>Recent Community Activity</h3>
+        <div className="activity-feed">
+          <div className="activity-item">
+            <div className="activity-avatar">👤</div>
+            <div className="activity-content">
+              <p><strong>Sarah M.</strong> left a 5-star review</p>
+              <small>2 hours ago</small>
+            </div>
+          </div>
+          <div className="activity-item">
+            <div className="activity-avatar">👤</div>
+            <div className="activity-content">
+              <p><strong>Mike D.</strong> is looking for vintage electronics</p>
+              <small>4 hours ago</small>
+            </div>
+          </div>
+          <div className="activity-item">
+            <div className="activity-avatar">👤</div>
+            <div className="activity-content">
+              <p><strong>Lisa K.</strong> joined the community</p>
+              <small>6 hours ago</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Coming Soon Features */}
+      <div className="coming-soon">
+        <h3>🚀 Coming Soon</h3>
+        <div className="feature-list">
+          <div className="feature-item">💬 Real-time messaging</div>
+          <div className="feature-item">📱 Mobile app</div>
+          <div className="feature-item">🏆 Member rewards program</div>
+          <div className="feature-item">📊 Advanced analytics</div>
+        </div>
+      </div>
     </div>
   )
 }
