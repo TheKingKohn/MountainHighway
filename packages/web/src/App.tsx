@@ -108,6 +108,32 @@ function App() {
 function Home() {
   const { user } = useAuth()
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [recentListings, setRecentListings] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    fetchRecentListings()
+  }, [])
+
+  const fetchRecentListings = async () => {
+    try {
+      const response = await fetch(`${API_URL}/listings`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // Get the 2 most recent listings
+          const recent = data.listings
+            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 2)
+          setRecentListings(recent)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch recent listings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
   
   const handleAuthClick = () => {
     setShowAuthModal(true)
@@ -196,25 +222,57 @@ function Home() {
             <Link to="/listings" className="see-all">See all</Link>
           </div>
           <div className="listings-preview">
-            <div className="preview-card">
-              <div className="preview-image">📷</div>
-              <div className="preview-info">
-                <h3>iPhone 14 Pro</h3>
-                <p>$650 <span className="was-price">was $899</span></p>
-                <div className="urgency">⏰ 3 people watching</div>
-              </div>
-            </div>
-            <div className="preview-card">
-              <div className="preview-image">📷</div>
-              <div className="preview-info">
-                <h3>Vintage Leather Jacket</h3>
-                <p>$85</p>
-                <div className="urgency">🔥 Just listed</div>
-              </div>
-            </div>
+            {loading ? (
+              <>
+                <div className="preview-card">
+                  <div className="preview-image">📷</div>
+                  <div className="preview-info">
+                    <h3>Loading...</h3>
+                    <p>$--</p>
+                  </div>
+                </div>
+                <div className="preview-card">
+                  <div className="preview-image">📷</div>
+                  <div className="preview-info">
+                    <h3>Loading...</h3>
+                    <p>$--</p>
+                  </div>
+                </div>
+              </>
+            ) : recentListings.length > 0 ? (
+              recentListings.map((listing, index) => (
+                <div key={listing.id} className="preview-card">
+                  <div className="preview-image">📷</div>
+                  <div className="preview-info">
+                    <h3>{listing.title}</h3>
+                    <p>${(listing.priceCents / 100).toFixed(2)}</p>
+                    <div className="urgency">
+                      {index === 0 ? '🔥 Just listed' : '⏰ Popular item'}
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="preview-card">
+                  <div className="preview-image">📷</div>
+                  <div className="preview-info">
+                    <h3>No listings yet</h3>
+                    <p>Be the first to sell!</p>
+                  </div>
+                </div>
+                <div className="preview-card">
+                  <div className="preview-image">�</div>
+                  <div className="preview-info">
+                    <h3>Start selling today</h3>
+                    <p>List your items</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           <Link to="/listings" className="view-all-button">
-            View All {user ? '47' : '40+'} Listings
+            View All Listings
           </Link>
         </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 import './Listings.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
@@ -18,10 +19,14 @@ interface Listing {
 
 const Listings: React.FC = () => {
   const { token } = useAuth();
+  const [searchParams] = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState<{[key: string]: number}>({});
+  
+  // Get category from URL parameter
+  const selectedCategory = searchParams.get('category') || 'all';
 
   useEffect(() => {
     fetchListings();
@@ -62,6 +67,24 @@ const Listings: React.FC = () => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
+
+  // Filter listings based on selected category
+  const categories = [
+    { key: 'all', label: 'All Categories', icon: '🛍️' },
+    { key: 'electronics', label: 'Electronics', icon: '📱' },
+    { key: 'fashion', label: 'Fashion', icon: '👕' },
+    { key: 'home', label: 'Home & Garden', icon: '🏠' },
+    { key: 'collectibles', label: 'Collectibles', icon: '🎨' },
+    { key: 'automotive', label: 'Automotive', icon: '🚗' },
+    { key: 'services', label: 'Services', icon: '🛠️' }
+  ];
+
+  const filteredListings = selectedCategory === 'all' 
+    ? listings 
+    : listings.filter(listing => 
+        listing.title.toLowerCase().includes(selectedCategory) ||
+        listing.description.toLowerCase().includes(selectedCategory)
+      );
 
   const changeMedia = (listingId: string, direction: number) => {
     const listing = listings.find(l => l.id === listingId);
@@ -142,27 +165,46 @@ const Listings: React.FC = () => {
   return (
     <div className="listings">
       <div className="listings-header">
-        <h2>🏔️ Marketplace Listings</h2>
+        <h2>🛍️ Marketplace Listings</h2>
         <p>Discover amazing items from our community</p>
+      </div>
+
+      {/* Category Filter */}
+      <div className="category-filter">
+        <h3>Filter by Category</h3>
+        <div className="category-tabs">
+          {categories.map(category => (
+            <a
+              key={category.key}
+              href={`/listings${category.key === 'all' ? '' : `?category=${category.key}`}`}
+              className={`category-tab ${selectedCategory === category.key ? 'active' : ''}`}
+            >
+              <span className="category-icon">{category.icon}</span>
+              <span>{category.label}</span>
+            </a>
+          ))}
+        </div>
       </div>
 
       <div className="listings-stats">
         <div className="stat">
-          <span className="stat-number">{listings.length}</span>
-          <span className="stat-label">Active Listings</span>
+          <span className="stat-number">{filteredListings.length}</span>
+          <span className="stat-label">
+            {selectedCategory === 'all' ? 'Active Listings' : `${categories.find(c => c.key === selectedCategory)?.label || ''} Items`}
+          </span>
         </div>
         <div className="stat">
-          <span className="stat-number">{new Set(listings.map(l => l.sellerId)).size}</span>
+          <span className="stat-number">{new Set(filteredListings.map(l => l.sellerId)).size}</span>
           <span className="stat-label">Sellers</span>
         </div>
         <div className="stat">
-          <span className="stat-number">${(listings.reduce((sum, l) => sum + l.priceCents, 0) / listings.length / 100).toFixed(0)}</span>
+          <span className="stat-number">${filteredListings.length > 0 ? (filteredListings.reduce((sum, l) => sum + l.priceCents, 0) / filteredListings.length / 100).toFixed(0) : '0'}</span>
           <span className="stat-label">Avg Price</span>
         </div>
       </div>
 
       <div className="listings-grid">
-        {listings.map(listing => {
+        {filteredListings.map(listing => {
           const currentMedia = getCurrentMedia(listing);
           const allMedia = [...listing.photos];
           if (listing.video) allMedia.push(listing.video);

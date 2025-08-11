@@ -38,6 +38,81 @@
   font-size: 1.2rem;
 }
 
+/* Category Filter Styles */
+.category-filter {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.category-filter h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.category-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.category-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #666;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.category-tab:hover {
+  border-color: #1976d2;
+  color: #1976d2;
+  transform: translateY(-2px);
+}
+
+.category-tab.active {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: white;
+}
+
+.category-tab .category-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.category-tab span:last-child {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .category-tabs {
+    gap: 0.25rem;
+  }
+  
+  .category-tab {
+    min-width: 70px;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .category-tab .category-icon {
+    font-size: 1.2rem;
+  }
+  
+  .category-tab span:last-child {
+    font-size: 0.7rem;
+  }
+}
+
 .listings-stats {
   display: flex;
   justify-content: center;
