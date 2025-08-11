@@ -4,8 +4,8 @@ import type { UserWithRoles, AuthContext } from '../services/rbac';
 export interface AuthenticatedRequest extends Request {
   user?: UserWithRoles | null;
   auth?: AuthContext;
-  file?: Express.Multer.File;
-  files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File;
+  file?: any;
+  files?: any;
 }
 
 // Type for requests where we know the user is authenticated
