@@ -235,36 +235,74 @@ function loadEnvironmentConfig(): EnvironmentConfig {
   return config;
 }
 
-// Export the loaded configuration
-export const config = loadEnvironmentConfig();
+// Configuration cache
+let configCache: EnvironmentConfig | null = null;
+
+/**
+ * Get the loaded configuration (lazy loading)
+ */
+export function getConfig(): EnvironmentConfig {
+  if (!configCache) {
+    configCache = loadEnvironmentConfig();
+  }
+  return configCache;
+}
+
+// Export the configuration getter
+export const config = new Proxy({} as EnvironmentConfig, {
+  get(target, prop) {
+    return getConfig()[prop as keyof EnvironmentConfig];
+  }
+});
 
 // Helper functions for common checks
-export const isDevelopment = () => config.NODE_ENV === 'development';
-export const isProduction = () => config.NODE_ENV === 'production';
-export const isTest = () => config.NODE_ENV === 'test';
+export const isDevelopment = () => getConfig().NODE_ENV === 'development';
+export const isProduction = () => getConfig().NODE_ENV === 'production';
+export const isTest = () => getConfig().NODE_ENV === 'test';
 
 // Export individual config sections for convenience
-export const serverConfig = {
-  PORT: config.PORT,
-  NODE_ENV: config.NODE_ENV,
-  FRONTEND_ORIGIN: config.FRONTEND_ORIGIN,
-};
+export const serverConfig = new Proxy({} as any, {
+  get(target, prop) {
+    const cfg = getConfig();
+    const serverKeys = ['PORT', 'NODE_ENV', 'FRONTEND_ORIGIN'];
+    if (serverKeys.includes(prop as string)) {
+      return cfg[prop as keyof EnvironmentConfig];
+    }
+    return undefined;
+  }
+});
 
-export const authConfig = {
-  JWT_SECRET: config.JWT_SECRET,
-  JWT_EXPIRES_IN: config.JWT_EXPIRES_IN,
-};
+export const authConfig = new Proxy({} as any, {
+  get(target, prop) {
+    const cfg = getConfig();
+    const authKeys = ['JWT_SECRET', 'JWT_EXPIRES_IN'];
+    if (authKeys.includes(prop as string)) {
+      return cfg[prop as keyof EnvironmentConfig];
+    }
+    return undefined;
+  }
+});
 
-export const stripeConfig = {
-  STRIPE_SECRET_KEY: config.STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET: config.STRIPE_WEBHOOK_SECRET,
-  PLATFORM_FEE_BPS: config.PLATFORM_FEE_BPS,
-};
+export const stripeConfig = new Proxy({} as any, {
+  get(target, prop) {
+    const cfg = getConfig();
+    const stripeKeys = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'PLATFORM_FEE_BPS'];
+    if (stripeKeys.includes(prop as string)) {
+      return cfg[prop as keyof EnvironmentConfig];
+    }
+    return undefined;
+  }
+});
 
-export const paypalConfig = {
-  PAYPAL_CLIENT_ID: config.PAYPAL_CLIENT_ID,
-  PAYPAL_CLIENT_SECRET: config.PAYPAL_CLIENT_SECRET,
-  PAYPAL_ENVIRONMENT: config.PAYPAL_ENVIRONMENT,
-};
+export const paypalConfig = new Proxy({} as any, {
+  get(target, prop) {
+    const cfg = getConfig();
+    const paypalKeys = ['PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_ENVIRONMENT'];
+    if (paypalKeys.includes(prop as string)) {
+      return cfg[prop as keyof EnvironmentConfig];
+    }
+    return undefined;
+  }
+});
 
 export default config;
