@@ -61,7 +61,7 @@ function App() {
           <header className="App-header">
             <div className="header-content">
               <div className="header-left">
-                <h1>🏔️ Mountain Highway</h1>
+                <h1>🏔️ MH</h1>
                 <Navigation />
               </div>
               <div className="header-right">
