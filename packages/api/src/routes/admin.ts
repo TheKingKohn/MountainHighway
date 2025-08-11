@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../types/auth';
-import { stripeConfig } from '../config/environment';
+import { stripeConfig, config } from '../config/environment';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -20,15 +20,20 @@ const requireAdmin = (req: AuthenticatedRequest, res: any, next: any) => {
     });
   }
 
-  // TODO: Replace with proper role-based system
-  const adminEmails = ['admin@mountainhighway.com', 'platform@mountainhighway.com'];
-  const isAdmin = adminEmails.includes(user.email.toLowerCase());
-
+  // Check admin status from auth context (set by RBAC middleware)
+  const isAdmin = req.auth?.isAdmin || false;
+  
+  // Fallback: check against ADMIN_EMAILS environment variable
   if (!isAdmin) {
-    return res.status(403).json({
-      success: false,
-      error: 'Admin access required'
-    });
+    const adminEmails = config.ADMIN_EMAILS ? config.ADMIN_EMAILS.split(',').map(email => email.trim().toLowerCase()) : [];
+    const userIsInAdminEmails = adminEmails.includes(user.email.toLowerCase());
+    
+    if (!userIsInAdminEmails) {
+      return res.status(403).json({
+        success: false,
+        error: 'Admin access required'
+      });
+    }
   }
 
   next();
