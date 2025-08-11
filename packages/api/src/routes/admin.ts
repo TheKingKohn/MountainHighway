@@ -180,6 +180,11 @@ router.get('/orders/stats', requireAuth, requireAdmin, async (req: Authenticated
     res.json({
       success: true,
       timeframe,
+      // Frontend expects these specific field names
+      totalHeldFunds: recentRevenue,
+      pendingOrders: heldOrders,
+      totalPlatformFees: recentPlatformFees,
+      // Additional detailed stats
       orders: {
         total: totalOrders,
         paid: paidOrders,
