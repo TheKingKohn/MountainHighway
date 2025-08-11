@@ -4,7 +4,7 @@ services:
   - type: web
     name: mountain-highway-api
     runtime: node
-    buildCommand: npm install && npm --prefix packages/api run build && cd packages/api && npx prisma migrate deploy && npx prisma generate
+    buildCommand: npm install && cd packages/api && npx prisma migrate deploy && npx prisma generate && npm run build
     startCommand: cd packages/api && npm start
     envVars:
       - key: NODE_ENV
