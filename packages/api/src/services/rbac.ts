@@ -5,12 +5,19 @@
  * It replaces the hardcoded admin email system with a flexible role-based approach.
  */
 
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { config } from '../config/environment';
 
 const prisma = new PrismaClient();
 
-export interface UserWithRoles extends User {
+// Explicit user type for deployment compatibility
+export interface UserWithRoles {
+  id: string;
+  email: string;
+  password: string;
+  stripeAccountId?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   roleAssignments: Array<{
     role: {
       id: string;
