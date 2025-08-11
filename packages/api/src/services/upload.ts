@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 });
 
 // File filter function
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: any, file: any, cb: multer.FileFilterCallback) => {
   if (file.fieldname === 'photos') {
     if (allowedImageTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -81,7 +81,7 @@ export const validateListingFiles = (files: any) => {
   
   // Validate photo sizes
   if (files.photos) {
-    files.photos.forEach((photo: Express.Multer.File, index: number) => {
+    files.photos.forEach((photo: any, index: number) => {
       if (photo.size > MAX_IMAGE_SIZE) {
         errors.push(`Photo ${index + 1} exceeds 5MB limit`);
       }

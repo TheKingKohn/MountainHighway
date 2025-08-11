@@ -28,7 +28,8 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
     const user = req.user!;
     
     // Validate uploaded files
-    const fileErrors = validateListingFiles(req.files);
+    const reqAny = req as any;
+    const fileErrors = validateListingFiles(reqAny.files);
     if (fileErrors.length > 0) {
       return res.status(400).json({
         success: false,
@@ -41,7 +42,7 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
     const { title, description, priceCents } = createListingSchema.parse(req.body);
     
     // Process uploaded files
-    const files = req.files as { photos?: Express.Multer.File[], video?: Express.Multer.File[] };
+    const files = reqAny.files as any;
     
     // Build photo paths array
     const photoPaths: string[] = [];
@@ -101,8 +102,9 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
     console.error('Error creating listing:', error);
     
     // Clean up uploaded files on error
-    if (req.files) {
-      const files = req.files as { photos?: Express.Multer.File[], video?: Express.Multer.File[] };
+    const reqAny = req as any;
+    if (reqAny.files) {
+      const files = reqAny.files as any;
       if (files.photos) {
         files.photos.forEach(photo => deleteFile(`images/${photo.filename}`));
       }

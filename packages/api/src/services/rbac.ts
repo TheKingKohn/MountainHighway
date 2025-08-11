@@ -353,7 +353,7 @@ export class RBACService {
   /**
    * Get all users with a specific role
    */
-  static async getUsersWithRole(roleName: string): Promise<User[]> {
+  static async getUsersWithRole(roleName: string): Promise<any[]> {
     const role = await prisma.role.findUnique({
       where: { name: roleName },
       include: {

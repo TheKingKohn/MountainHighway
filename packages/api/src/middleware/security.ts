@@ -343,11 +343,12 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
  */
 export const validateFileUpload = (req: Request, res: Response, next: NextFunction) => {
   // Check if file was uploaded
-  if (!req.file && !req.files) {
+  const reqAny = req as any;
+  if (!reqAny.file && !reqAny.files) {
     return next();
   }
   
-  const files = req.files ? (Array.isArray(req.files) ? req.files : [req.file]) : [req.file];
+  const files = reqAny.files ? (Array.isArray(reqAny.files) ? reqAny.files : [reqAny.file]) : [reqAny.file];
   
   for (const file of files) {
     if (!file) continue;

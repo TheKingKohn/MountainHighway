@@ -57,7 +57,7 @@ router.post('/register', authLimiter, async (req: Request, res: Response): Promi
       return;
     }
 
-    const { email, password }: RegisterRequest = validationResult.data;
+    const { email, password } = validationResult.data as RegisterRequest;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -114,7 +114,7 @@ router.post('/login', authLimiter, async (req: Request, res: Response): Promise<
       return;
     }
 
-    const { email, password }: LoginRequest = validationResult.data;
+    const { email, password } = validationResult.data as LoginRequest;
 
     // Find user
     const user = await prisma.user.findUnique({
