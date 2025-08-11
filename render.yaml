@@ -34,7 +34,7 @@ services:
     buildCommand: npm install && npm --prefix packages/web run build
     staticPublishPath: packages/web/dist
     envVars:
-      - key: VITE_API_BASE_URL
+      - key: VITE_API_URL
         value: https://mountain-highway-api.onrender.com
     routes:
       - type: rewrite

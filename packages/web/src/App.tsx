@@ -12,13 +12,14 @@ import AdminPanel from './components/AdminPanel'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function Navigation() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   
   return (
     <nav>
       <Link to="/">Home</Link>
       <Link to="/listings">Listings</Link>
       {user && <Link to="/create-listing">Create Listing</Link>}
+      {isAdmin && <Link to="/admin">Admin Panel</Link>}
       <Link to="/about">About</Link>
     </nav>
   )
