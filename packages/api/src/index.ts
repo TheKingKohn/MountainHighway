@@ -40,7 +40,8 @@ import webhookRoutes from './routes/webhooks';
 import testRoutes from './routes/test';
 import messageRoutes from './routes/messages';
 import adminRoutes from './routes/admin';
-import communityRoutes from './routes/community';
+// Temporarily commented out until database migration is complete
+// import communityRoutes from './routes/community';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -93,7 +94,8 @@ app.use('/listings', listingRoutes);
 app.use('/orders', orderRoutes);
 app.use('/orders', messageRoutes);
 app.use('/admin', adminRoutes);
-app.use('/community', communityRoutes);
+// Temporarily commented out until database migration is complete
+// app.use('/community', communityRoutes);
 
 // Conditional routes based on environment
 if (config.ENABLE_DEV_ROUTES) {
