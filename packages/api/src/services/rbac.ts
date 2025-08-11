@@ -14,7 +14,6 @@ const prisma = new PrismaClient();
 export interface UserWithRoles {
   id: string;
   email: string;
-  password: string;
   stripeAccountId?: string | null;
   createdAt: Date;
   updatedAt: Date;
