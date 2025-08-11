@@ -1,7 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../types/auth';
 import { requireAuth } from '../middleware/auth';
-import RBACService from '../services/rbac';
 import { config } from '../config/environment';
 
 const router = Router();
@@ -38,12 +37,10 @@ router.get('/debug-admin', requireAuth, async (req: AuthenticatedRequest, res: R
     }
 
     const adminEmails = config.ADMIN_EMAILS ? config.ADMIN_EMAILS.split(',').map(email => email.trim()) : [];
-    const userWithRoles = await RBACService.getUserWithRoles(req.user.id);
     
     res.status(200).json({
       currentUser: req.user.email,
       adminEmails,
-      userRoles: userWithRoles?.roleAssignments.map(ra => ra.role.name) || [],
       isAdminFromContext: req.auth?.isAdmin || false,
       hasAdminEmailsConfigured: adminEmails.length > 0,
       isEmailInAdminList: adminEmails.includes(req.user.email),
