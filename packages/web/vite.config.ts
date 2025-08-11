@@ -8,4 +8,12 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+      },
+    },
+  },
+  publicDir: 'public', // Ensure public directory is copied
 })
