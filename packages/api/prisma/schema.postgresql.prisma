@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// PostgreSQL configuration for production
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  username        String    @unique
+  password        String
+  fullName        String?
+  bio             String?
+  location        String?
+  profileImage    String?
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  listings        Listing[]
+  orders          Order[]
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+model Listing {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  price       Decimal   @db.Decimal(10, 2)
+  condition   String
+  category    String
+  subcategory String?
+  brand       String?
+  images      String[]  // JSON array of image URLs
+  location    String
+  shippingOptions String[] // JSON array of shipping options
+  status      String    @default("active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Foreign Keys
+  sellerId    String
+  
+  // Relations
+  seller      User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  orders      Order[]
+
+  @@map("listings")
+}
+
+model Order {
+  id              String    @id @default(cuid())
+  status          String    @default("pending")
+  totalAmount     Decimal   @db.Decimal(10, 2)
+  platformFee     Decimal   @db.Decimal(10, 2)
+  paymentMethod   String
+  paymentIntentId String?
+  shippingAddress String
+  trackingNumber  String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Foreign Keys
+  buyerId         String
+  listingId       String
+  
+  // Relations
+  buyer           User      @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  listing         Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("orders")
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  content     String
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  
+  // Foreign Keys
+  senderId    String
+  receiverId  String
+  
+  // Relations
+  sender      User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}

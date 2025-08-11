@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mountain Highway - File Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="file"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .listing-preview {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+        .photo-preview, .video-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏔️ Mountain Highway - Create Listing</h1>
+        
+        <form id="listingForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="priceCents">Price (in cents) *</label>
+                <input type="number" id="priceCents" name="priceCents" required min="1">
+                <div class="file-info">Example: 2500 = $25.00</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="photos">Photos * (1-3 images)</label>
+                <input type="file" id="photos" name="photos" accept="image/*" multiple required>
+                <div class="file-info">At least 1 photo required. Max 3 photos, 5MB each. JPEG, PNG, WebP supported.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="video">Video (optional)</label>
+                <input type="file" id="video" name="video" accept="video/*">
+                <div class="file-info">Optional. Max 50MB. MP4, WebM, QuickTime supported.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="token">Auth Token *</label>
+                <input type="text" id="token" name="token" required placeholder="Get from /auth/login">
+                <div class="file-info">Login first to get your authentication token</div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Create Listing</button>
+        </form>
+        
+        <div id="response" class="response"></div>
+        <div id="listingPreview" class="listing-preview" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('listingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const responseDiv = document.getElementById('response');
+            const previewDiv = document.getElementById('listingPreview');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            responseDiv.style.display = 'none';
+            previewDiv.style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                const title = document.getElementById('title').value;
+                const description = document.getElementById('description').value;
+                const priceCents = document.getElementById('priceCents').value;
+                const token = document.getElementById('token').value;
+                const photos = document.getElementById('photos').files;
+                const video = document.getElementById('video').files[0];
+                
+                // Add text fields
+                formData.append('title', title);
+                formData.append('description', description);
+                formData.append('priceCents', priceCents);
+                
+                // Add photos
+                for (let i = 0; i < photos.length; i++) {
+                    formData.append('photos', photos[i]);
+                }
+                
+                // Add video if selected
+                if (video) {
+                    formData.append('video', video);
+                }
+                
+                const response = await fetch('http://localhost:4000/listings', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = 'Listing created successfully!';
+                    responseDiv.style.display = 'block';
+                    
+                    // Show preview
+                    let previewHTML = `
+                        <h3>Created Listing Preview</h3>
+                        <p><strong>Title:</strong> ${result.listing.title}</p>
+                        <p><strong>Description:</strong> ${result.listing.description}</p>
+                        <p><strong>Price:</strong> $${(result.listing.priceCents / 100).toFixed(2)}</p>
+                        <p><strong>Status:</strong> ${result.listing.status}</p>
+                        <div><strong>Photos:</strong></div>
+                    `;
+                    
+                    result.listing.photos.forEach((photoUrl, index) => {
+                        previewHTML += `<img src="${photoUrl}" alt="Photo ${index + 1}" class="photo-preview">`;
+                    });
+                    
+                    if (result.listing.video) {
+                        previewHTML += `
+                            <div><strong>Video:</strong></div>
+                            <video src="${result.listing.video}" controls class="video-preview"></video>
+                        `;
+                    }
+                    
+                    previewDiv.innerHTML = previewHTML;
+                    previewDiv.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('listingForm').reset();
+                    
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `Error: ${result.error}`;
+                    if (result.details) {
+                        responseDiv.textContent += ` Details: ${JSON.stringify(result.details)}`;
+                    }
+                    responseDiv.style.display = 'block';
+                }
+                
+            } catch (error) {
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `Network error: ${error.message}`;
+                responseDiv.style.display = 'block';
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Listing';
+        });
+        
+        // Validate file selection
+        document.getElementById('photos').addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 3) {
+                alert('Maximum 3 photos allowed');
+                e.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

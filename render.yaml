@@ -1,0 +1,46 @@
+# Render.com deployment configuration for Mountain Highway
+services:
+  # Backend API Service
+  - type: web
+    name: mountain-highway-api
+    runtime: node
+    buildCommand: cd packages/api && npm install && npm run build
+    startCommand: cd packages/api && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mountain-highway-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: https://mountain-highway.onrender.com
+    healthCheckPath: /health
+    
+  # Frontend Web Service  
+  - type: web
+    name: mountain-highway-web
+    runtime: static
+    buildCommand: cd packages/web && npm install && npm run build
+    staticPublishPath: packages/web/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://mountain-highway-api.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# Database
+databases:
+  - name: mountain-highway-db
+    databaseName: mountain_highway
+    user: mountain_highway_user

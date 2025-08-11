@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Multi-database support: SQLite for development, PostgreSQL for production
+// Use schema files: schema.sqlite.prisma or schema.postgresql.prisma for specific providers
+// Default configuration for SQLite (development)
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  stripeAccountId String?
+  
+  // Role-based authentication fields
+  role            String    @default("user") // "user", "admin", "moderator"
+  permissions     String?   // JSON array of specific permissions
+  isActive        Boolean   @default(true)
+  isEmailVerified Boolean   @default(false)
+  
+  // Profile fields
+  username        String?   @unique
+  fullName        String?
+  bio             String?
+  location        String?
+  profileImage    String?
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastLoginAt     DateTime?
+  
+  // Relations
+  listings        Listing[]
+  sentMessages    Message[]
+  orders          Order[]
+  
+  // Role management relations
+  roleAssignments RoleAssignment[]
+  assignedRoles   RoleAssignment[] @relation("RoleAssigner")
+  auditLogs       AuditLog[]
+
+  @@map("users")
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  sellerId    String
+  title       String
+  description String
+  priceCents  Int
+  photos      String // JSON array of photo file paths (TEXT in both SQLite and PostgreSQL)
+  video       String? // Optional video file path
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  seller      User     @relation(fields: [sellerId], references: [id])
+  orders      Order[]
+
+  @@map("listings")
+}
+
+model Order {
+  id                    String    @id @default(cuid())
+  listingId             String
+  buyerId               String
+  amountCents           Int
+  paymentMethod         String    @default("stripe") // "stripe", "paypal", "card"
+  stripePaymentIntentId String?
+  paypalOrderId         String?
+  status                String    @default("PENDING") // "PENDING", "HELD", "PAID", "CANCELLED", "REFUNDED"
+  deliveryStatus        String?   @default("NOT_SHIPPED") // "NOT_SHIPPED", "SHIPPED", "DELIVERED", "CONFIRMED"
+  shippedAt             DateTime?
+  deliveredAt           DateTime?
+  confirmedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  paidAt                DateTime?
+  releasedAt            DateTime?
+  messages              Message[]
+  buyer                 User      @relation(fields: [buyerId], references: [id])
+  listing               Listing   @relation(fields: [listingId], references: [id])
+
+  @@map("orders")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  orderId   String
+  senderId  String
+  body      String
+  createdAt DateTime @default(now())
+  sender    User     @relation(fields: [senderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@map("messages")
+}
+
+// Role-Based Authentication Models
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique // "admin", "moderator", "user", "vip_seller"
+  description String?
+  level       Int      @default(0) // 0=user, 50=moderator, 100=admin
+  isSystem    Boolean  @default(false) // System roles cannot be deleted
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  assignments RoleAssignment[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique // "users.read", "users.write", "listings.moderate"
+  resource    String   // "users", "listings", "orders", "system"
+  action      String   // "read", "write", "delete", "moderate"
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RoleAssignment {
+  id         String    @id @default(cuid())
+  userId     String
+  roleId     String
+  assignedBy String?   // User ID who assigned this role
+  expiresAt  DateTime? // Optional expiration for temporary roles
+  createdAt  DateTime  @default(now())
+  
+  // Relations
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  assigner   User?     @relation("RoleAssigner", fields: [assignedBy], references: [id])
+
+  @@unique([userId, roleId])
+  @@map("role_assignments")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+  
+  // Relations
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?  // User who performed the action
+  action      String   // "login", "role_assigned", "user_banned", etc.
+  resource    String?  // "user", "listing", "order"
+  resourceId  String?  // ID of the affected resource
+  details     String?  // JSON with additional details
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

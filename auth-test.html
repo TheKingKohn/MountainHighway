@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🏔️ Mountain Highway API - Auth Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Register New User</h3>
+        <input type="email" id="regEmail" placeholder="Email" value="testuser@example.com">
+        <input type="password" id="regPassword" placeholder="Password" value="password123">
+        <button onclick="testRegister()">Register</button>
+        <div id="registerResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Login User</h3>
+        <input type="email" id="loginEmail" placeholder="Email" value="testuser@example.com">
+        <input type="password" id="loginPassword" placeholder="Password" value="password123">
+        <button onclick="testLogin()">Login</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Get Current User (/me)</h3>
+        <input type="text" id="token" placeholder="JWT Token (auto-filled from login)" style="width: 400px;">
+        <button onclick="testMe()">Get Profile</button>
+        <div id="meResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test Invalid Token</h3>
+        <button onclick="testInvalidToken()">Test with Invalid Token</button>
+        <div id="invalidResult"></div>
+    </div>
+
+    <script>
+        let currentToken = '';
+
+        async function apiCall(endpoint, method = 'GET', body = null, token = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const config = {
+                method,
+                headers
+            };
+
+            if (body) {
+                config.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`http://localhost:4000${endpoint}`, config);
+                const data = await response.json();
+                return { success: response.ok, status: response.status, data };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayResult(elementId, result) {
+            const element = document.getElementById(elementId);
+            const isSuccess = result.success;
+            element.innerHTML = `
+                <div class="${isSuccess ? 'success' : 'error'}">
+                    <strong>${isSuccess ? '✅ Success' : '❌ Error'}</strong> 
+                    ${result.status ? `(Status: ${result.status})` : ''}
+                </div>
+                <pre>${JSON.stringify(result.data || result.error, null, 2)}</pre>
+            `;
+        }
+
+        async function testRegister() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            const result = await apiCall('/auth/register', 'POST', { email, password });
+            displayResult('registerResult', result);
+            
+            if (result.success && result.data.token) {
+                currentToken = result.data.token;
+                document.getElementById('token').value = currentToken;
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('loginPassword').value = password;
+            }
+        }
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const result = await apiCall('/auth/login', 'POST', { email, password });
+            displayResult('loginResult', result);
+            
+            if (result.success && result.data.token) {
+                currentToken = result.data.token;
+                document.getElementById('token').value = currentToken;
+            }
+        }
+
+        async function testMe() {
+            const token = document.getElementById('token').value || currentToken;
+            
+            if (!token) {
+                displayResult('meResult', { success: false, error: 'No token provided. Please login first.' });
+                return;
+            }
+            
+            const result = await apiCall('/me', 'GET', null, token);
+            displayResult('meResult', result);
+        }
+
+        async function testInvalidToken() {
+            const result = await apiCall('/me', 'GET', null, 'invalid.token.here');
+            displayResult('invalidResult', result);
+        }
+
+        // Test API connection on load
+        window.onload = async () => {
+            try {
+                const health = await fetch('http://localhost:4000/health');
+                const healthData = await health.json();
+                if (healthData.ok) {
+                    console.log('✅ API server is running');
+                } else {
+                    console.log('⚠️ API server responded but health check failed');
+                }
+            } catch (error) {
+                console.log('❌ Cannot connect to API server:', error.message);
+                alert('⚠️ Make sure the API server is running on http://localhost:4000');
+            }
+        };
+    </script>
+</body>
+</html>
