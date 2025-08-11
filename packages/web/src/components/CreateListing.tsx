@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './CreateListing.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 interface CreateListingProps {
   onListingCreated?: () => void;
 }
@@ -95,7 +97,7 @@ const CreateListing: React.FC<CreateListingProps> = ({ onListingCreated }) => {
         formDataToSend.append('video', video);
       }
 
-      const response = await fetch('http://localhost:4000/listings', {
+      const response = await fetch(`${API_URL}/listings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

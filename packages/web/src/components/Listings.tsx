@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './Listings.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
 interface Listing {
   id: string;
   title: string;
@@ -28,7 +30,7 @@ const Listings: React.FC = () => {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/listings');
+      const response = await fetch(`${API_URL}/listings`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch listings');
