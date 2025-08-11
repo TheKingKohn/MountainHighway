@@ -8,6 +8,7 @@ import AuthModal from './components/AuthModal'
 import CreateListing from './components/CreateListing'
 import ListingsPage from './components/Listings'
 import AdminPanel from './components/AdminPanel'
+import Community from './components/Community'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
@@ -317,111 +318,6 @@ function About() {
     <div>
       <h2>About Mountain Highway</h2>
       <p>Mountain Highway is your local exclusive marketplace where community matters. Connect with trusted members, discover unique items, and build lasting relationships.</p>
-    </div>
-  )
-}
-
-function Community() {
-  const { user } = useAuth()
-  
-  if (!user) {
-    return (
-      <div className="community-page">
-        <h2>Community</h2>
-        <p>Please sign in to access the community features.</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="community-page">
-      <h2>🌟 Community Hub</h2>
-      
-      {/* Community Stats */}
-      <div className="community-stats">
-        <div className="stat-card">
-          <div className="stat-number">2,500+</div>
-          <div className="stat-label">Active Members</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">850+</div>
-          <div className="stat-label">Items Sold</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">98%</div>
-          <div className="stat-label">Satisfaction</div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="community-actions">
-        <h3>Connect & Share</h3>
-        <div className="action-grid">
-          <div className="action-card">
-            <div className="action-icon">💬</div>
-            <h4>General Chat</h4>
-            <p>Connect with other members</p>
-            <button className="action-btn">Join Chat</button>
-          </div>
-          <div className="action-card">
-            <div className="action-icon">🤝</div>
-            <h4>Trade Requests</h4>
-            <p>Looking for something specific?</p>
-            <button className="action-btn">Post Request</button>
-          </div>
-          <div className="action-card">
-            <div className="action-icon">⭐</div>
-            <h4>Member Reviews</h4>
-            <p>Share your experience</p>
-            <button className="action-btn">Write Review</button>
-          </div>
-          <div className="action-card">
-            <div className="action-icon">📍</div>
-            <h4>Local Events</h4>
-            <p>Meet up with members nearby</p>
-            <button className="action-btn">View Events</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="recent-activity">
-        <h3>Recent Community Activity</h3>
-        <div className="activity-feed">
-          <div className="activity-item">
-            <div className="activity-avatar">👤</div>
-            <div className="activity-content">
-              <p><strong>Sarah M.</strong> left a 5-star review</p>
-              <small>2 hours ago</small>
-            </div>
-          </div>
-          <div className="activity-item">
-            <div className="activity-avatar">👤</div>
-            <div className="activity-content">
-              <p><strong>Mike D.</strong> is looking for vintage electronics</p>
-              <small>4 hours ago</small>
-            </div>
-          </div>
-          <div className="activity-item">
-            <div className="activity-avatar">👤</div>
-            <div className="activity-content">
-              <p><strong>Lisa K.</strong> joined the community</p>
-              <small>6 hours ago</small>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Coming Soon Features */}
-      <div className="coming-soon">
-        <h3>🚀 Coming Soon</h3>
-        <div className="feature-list">
-          <div className="feature-item">💬 Real-time messaging</div>
-          <div className="feature-item">📱 Mobile app</div>
-          <div className="feature-item">🏆 Member rewards program</div>
-          <div className="feature-item">📊 Advanced analytics</div>
-        </div>
-      </div>
     </div>
   )
 }

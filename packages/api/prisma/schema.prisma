@@ -41,6 +41,11 @@ model User {
   roleAssignments RoleAssignment[]
   assignedRoles   RoleAssignment[] @relation("RoleAssigner")
   auditLogs       AuditLog[]
+  
+  // Community relations
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityLike[]
 
   @@map("users")
 }
@@ -174,4 +179,51 @@ model AuditLog {
   user        User?    @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+// Community Models
+model CommunityPost {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  type      String   @default("discussion") // "discussion", "trade_request", "local_event", "review"
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  author    User               @relation(fields: [authorId], references: [id])
+  comments  CommunityComment[]
+  likes     CommunityLike[]
+
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id])
+
+  @@map("community_comments")
+}
+
+model CommunityLike {
+  id       String @id @default(cuid())
+  userId   String
+  postId   String
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user     User          @relation(fields: [userId], references: [id])
+  post     CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@map("community_likes")
 }
