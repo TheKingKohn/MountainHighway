@@ -2,11 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Multi-database support: SQLite for development, PostgreSQL for production
-// Use schema files: schema.sqlite.prisma or schema.postgresql.prisma for specific providers
-// Default configuration for SQLite (development)
+// PostgreSQL for production deployment
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
