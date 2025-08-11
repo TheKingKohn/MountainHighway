@@ -221,7 +221,15 @@ function loadEnvironmentConfig(): EnvironmentConfig {
 
     // Database
     DATABASE_URL: getEnvVar('DATABASE_URL'),
-    DATABASE_PROVIDER: (getEnvVar('DATABASE_PROVIDER', 'sqlite') as 'sqlite' | 'postgresql'),
+    DATABASE_PROVIDER: (() => {
+      const url = getEnvVar('DATABASE_URL', '');
+      // Auto-detect provider from DATABASE_URL
+      if (url.startsWith('postgresql://') || url.startsWith('postgres://')) {
+        return 'postgresql' as const;
+      }
+      // Default to sqlite for development or if not specified
+      return (getEnvVar('DATABASE_PROVIDER', 'sqlite') as 'sqlite' | 'postgresql');
+    })(),
 
     // Stripe Configuration
     STRIPE_SECRET_KEY: getEnvVar('STRIPE_SECRET_KEY'),
