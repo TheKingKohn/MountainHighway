@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc --noEmitOnError false --skipLibCheck && prisma generate",
-    "start": "prisma migrate deploy && node dist/index.js",
+    "start": "prisma db push --accept-data-loss && node dist/index.js",
     "start:prod": "NODE_ENV=production node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
