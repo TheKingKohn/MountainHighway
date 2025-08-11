@@ -1,8 +1,15 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Only load environment variables if not in build context
+if (process.env.NODE_ENV !== 'build' && typeof process !== 'undefined' && process.env) {
+  try {
+    dotenv.config();
+  } catch (error) {
+    // Ignore dotenv errors during build
+    console.warn('Dotenv configuration skipped:', error);
+  }
+}
 
 /**
  * Environment Configuration for Mountain Highway API
@@ -68,6 +75,24 @@ const REQUIRED_ENV_VARS = [
  * Get environment variable with fallback
  */
 function getEnvVar(key: string, defaultValue?: string): string {
+  // During build time, return safe defaults
+  if (process.env.NODE_ENV === 'build' || !process.env.NODE_ENV) {
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+    // Return build-safe defaults for required vars
+    switch (key) {
+      case 'JWT_SECRET':
+        return 'build-time-placeholder-jwt-secret';
+      case 'DATABASE_URL':
+        return 'build-time-placeholder-database-url';
+      case 'STRIPE_SECRET_KEY':
+        return 'build-time-placeholder-stripe-key';
+      default:
+        return 'build-time-placeholder';
+    }
+  }
+
   const value = process.env[key];
   if (value === undefined) {
     if (defaultValue !== undefined) {
@@ -109,6 +134,11 @@ function getEnvBoolean(key: string, defaultValue: boolean): boolean {
  * Validate critical environment variables
  */
 function validateEnvironment(): void {
+  // Skip validation during build time
+  if (process.env.NODE_ENV === 'build' || !process.env.NODE_ENV) {
+    return;
+  }
+
   const errors: string[] = [];
 
   // Check required variables
@@ -222,15 +252,17 @@ function loadEnvironmentConfig(): EnvironmentConfig {
     ENABLE_DEV_ROUTES: getEnvBoolean('ENABLE_DEV_ROUTES', true),
   };
 
-  // Log configuration summary
-  console.log('🔧 Environment Configuration Loaded:');
-  console.log(`   Environment: ${config.NODE_ENV}`);
-  console.log(`   Port: ${config.PORT}`);
-  console.log(`   Frontend Origin: ${config.FRONTEND_ORIGIN}`);
-  console.log(`   Database: ${config.DATABASE_URL.includes('postgresql') ? 'PostgreSQL' : 'SQLite'}`);
-  console.log(`   Stripe Mode: ${config.STRIPE_SECRET_KEY.startsWith('sk_live_') ? 'Live' : 'Test'}`);
-  console.log(`   Mock Payments: ${config.ENABLE_MOCK_PAYMENTS ? 'Enabled' : 'Disabled'}`);
-  console.log(`   Platform Fee: ${config.PLATFORM_FEE_BPS / 100}%`);
+  // Log configuration summary (only in runtime)
+  if (process.env.NODE_ENV !== 'build') {
+    console.log('🔧 Environment Configuration Loaded:');
+    console.log(`   Environment: ${config.NODE_ENV}`);
+    console.log(`   Port: ${config.PORT}`);
+    console.log(`   Frontend Origin: ${config.FRONTEND_ORIGIN}`);
+    console.log(`   Database: ${config.DATABASE_URL.includes('postgresql') ? 'PostgreSQL' : 'SQLite'}`);
+    console.log(`   Stripe Mode: ${config.STRIPE_SECRET_KEY.startsWith('sk_live_') ? 'Live' : 'Test'}`);
+    console.log(`   Mock Payments: ${config.ENABLE_MOCK_PAYMENTS ? 'Enabled' : 'Disabled'}`);
+    console.log(`   Platform Fee: ${config.PLATFORM_FEE_BPS / 100}%`);
+  }
 
   return config;
 }
