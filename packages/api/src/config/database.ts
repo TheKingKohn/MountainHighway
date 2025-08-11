@@ -36,6 +36,11 @@ export function validateDatabaseConnection(): ConnectionValidationResult {
   const issues: string[] = [];
   const recommendations: string[] = [];
 
+  // Debug logging
+  console.log(`🔍 Debug - DATABASE_PROVIDER from config: ${DATABASE_PROVIDER}`);
+  console.log(`🔍 Debug - DATABASE_URL starts with: ${DATABASE_URL ? DATABASE_URL.substring(0, 20) + '...' : 'undefined'}`);
+  console.log(`🔍 Debug - process.env.DATABASE_PROVIDER: ${process.env.DATABASE_PROVIDER}`);
+
   // Basic validation
   if (!DATABASE_URL) {
     issues.push('DATABASE_URL is not configured');
