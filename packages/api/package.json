@@ -1,6 +1,11 @@
 {
   "name": "@mountain-highway/api",
-  "version": "1.0.0",
+  "versio    "stripe": "^14.25.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "zod": "^3.22.4""1.0.0",
   "description": "API server for Mountain Highway marketplace",
   "main": "dist/index.js",
   "scripts": {
@@ -70,8 +75,6 @@
     "jest": "^30.0.5",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
     "ts-jest": "^29.4.1",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.7.1",
