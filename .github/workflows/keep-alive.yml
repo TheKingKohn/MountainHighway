@@ -1,0 +1,38 @@
+name: Keep-Alive Service
+on:
+  schedule:
+    # Ping every 10 minutes (GitHub Actions minimum is 5 minutes)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Mountain Highway API
+        run: |
+          echo "🏔️ Pinging Mountain Highway API..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://mountain-highway-api.onrender.com/keep-alive" || echo "000")
+          if [ "$response" -eq 200 ] || [ "$response" -eq 204 ]; then
+            echo "✅ API is responding (HTTP $response)"
+          else
+            echo "❌ API failed to respond (HTTP $response)"
+            # Try health endpoint as backup
+            health_response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://mountain-highway-api.onrender.com/health" || echo "000")
+            echo "🔄 Health endpoint responded with HTTP $health_response"
+          fi
+          
+      - name: Ping Mountain Highway Web
+        run: |
+          echo "🌐 Pinging Mountain Highway Web..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://mountain-highway.onrender.com" || echo "000")
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Web app is responding (HTTP $response)"
+          else
+            echo "❌ Web app failed to respond (HTTP $response)"
+          fi
+          
+      - name: Summary
+        run: |
+          echo "🎯 Keep-alive ping completed at $(date)"
+          echo "Next scheduled ping in 10 minutes"

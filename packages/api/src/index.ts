@@ -181,6 +181,16 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Keep-alive endpoint for preventing cold starts
+app.get('/keep-alive', (req, res) => {
+  res.json({
+    status: 'alive',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    message: 'Service is warm and ready'
+  });
+});
+
 // Start server
 app.listen(config.PORT, async () => {
   // Initialize database connection

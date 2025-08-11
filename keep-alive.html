@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mountain Highway Keep-Alive</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .service {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .service.error {
+            border-left-color: #f44336;
+        }
+        
+        .service-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .service-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .status-ok {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .status-error {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .timestamp {
+            color: #ccc;
+            margin-right: 10px;
+        }
+        
+        .auto-ping-info {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏔️ Mountain Highway Keep-Alive</h1>
+        
+        <div class="auto-ping-info">
+            <p><strong>Auto-ping every 10 minutes to prevent cold starts</strong></p>
+            <p>Status: <span id="auto-status">Active</span> | Next ping in: <span id="countdown">--:--</span></p>
+        </div>
+        
+        <div class="controls">
+            <button onclick="pingAllServices()" id="pingBtn">Ping All Services</button>
+            <button onclick="toggleAutoPing()" id="autoBtn">Stop Auto-Ping</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div id="services">
+            <div class="service" id="api-service">
+                <div class="service-name">Mountain Highway API</div>
+                <div class="service-status">
+                    <span>https://mountain-highway-api.onrender.com/health</span>
+                    <span class="status-indicator status-pending" id="api-status">Pending</span>
+                </div>
+            </div>
+            
+            <div class="service" id="web-service">
+                <div class="service-name">Mountain Highway Web</div>
+                <div class="service-status">
+                    <span>https://mountain-highway.onrender.com</span>
+                    <span class="status-indicator status-pending" id="web-status">Pending</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="log" id="log">
+            <div class="log-entry">
+                <span class="timestamp">[${new Date().toLocaleTimeString()}]</span>
+                Keep-alive service initialized
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVICES = [
+            {
+                name: 'API',
+                url: 'https://mountain-highway-api.onrender.com/health',
+                elementId: 'api-service',
+                statusId: 'api-status'
+            },
+            {
+                name: 'Web',
+                url: 'https://mountain-highway.onrender.com',
+                elementId: 'web-service',
+                statusId: 'web-status'
+            }
+        ];
+        
+        let autoPingInterval;
+        let countdownInterval;
+        let nextPingTime;
+        let isAutoPingActive = true;
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="timestamp">[${new Date().toLocaleTimeString()}]</span>${message}`;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateStatus(serviceId, status, success) {
+            const element = document.getElementById(serviceId);
+            const statusElement = document.getElementById(status);
+            
+            statusElement.className = 'status-indicator ' + (success ? 'status-ok' : 'status-error');
+            statusElement.textContent = success ? 'Online' : 'Error';
+            
+            element.className = 'service' + (success ? '' : ' error');
+        }
+        
+        async function pingService(service) {
+            try {
+                log(`Pinging ${service.name}...`);
+                
+                // Use fetch with no-cors mode for cross-origin requests
+                const response = await fetch(service.url, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+                
+                // In no-cors mode, we can't read the response, but if fetch doesn't throw, the service is likely up
+                updateStatus(service.elementId, service.statusId, true);
+                log(`✅ ${service.name}: Service responded`);
+                return true;
+            } catch (error) {
+                updateStatus(service.elementId, service.statusId, false);
+                log(`❌ ${service.name}: ${error.message}`);
+                return false;
+            }
+        }
+        
+        async function pingAllServices() {
+            const pingBtn = document.getElementById('pingBtn');
+            pingBtn.disabled = true;
+            pingBtn.textContent = 'Pinging...';
+            
+            log('🏔️ Starting ping cycle...');
+            
+            for (const service of SERVICES) {
+                await pingService(service);
+                // Small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            log('✨ Ping cycle completed');
+            
+            pingBtn.disabled = false;
+            pingBtn.textContent = 'Ping All Services';
+            
+            // Update next ping time
+            if (isAutoPingActive) {
+                nextPingTime = Date.now() + (10 * 60 * 1000);
+            }
+        }
+        
+        function startAutoPing() {
+            if (autoPingInterval) clearInterval(autoPingInterval);
+            
+            // Ping immediately
+            pingAllServices();
+            
+            // Set up 10-minute interval
+            autoPingInterval = setInterval(pingAllServices, 10 * 60 * 1000);
+            nextPingTime = Date.now() + (10 * 60 * 1000);
+            
+            log('🚀 Auto-ping started (every 10 minutes)');
+        }
+        
+        function stopAutoPing() {
+            if (autoPingInterval) {
+                clearInterval(autoPingInterval);
+                autoPingInterval = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            nextPingTime = null;
+            document.getElementById('countdown').textContent = '--:--';
+            log('⏹️ Auto-ping stopped');
+        }
+        
+        function toggleAutoPing() {
+            const autoBtn = document.getElementById('autoBtn');
+            const autoStatus = document.getElementById('auto-status');
+            
+            if (isAutoPingActive) {
+                stopAutoPing();
+                isAutoPingActive = false;
+                autoBtn.textContent = 'Start Auto-Ping';
+                autoStatus.textContent = 'Stopped';
+            } else {
+                startAutoPing();
+                isAutoPingActive = true;
+                autoBtn.textContent = 'Stop Auto-Ping';
+                autoStatus.textContent = 'Active';
+            }
+        }
+        
+        function updateCountdown() {
+            if (!nextPingTime || !isAutoPingActive) {
+                document.getElementById('countdown').textContent = '--:--';
+                return;
+            }
+            
+            const remaining = Math.max(0, nextPingTime - Date.now());
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            document.getElementById('countdown').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = 
+                '<div class="log-entry"><span class="timestamp">[' + 
+                new Date().toLocaleTimeString() + ']</span>Log cleared</div>';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎯 Mountain Highway Keep-Alive Dashboard loaded');
+            startAutoPing();
+            
+            // Update countdown every second
+            countdownInterval = setInterval(updateCountdown, 1000);
+        });
+        
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                log('👋 Page hidden - keep-alive continues in background');
+            } else {
+                log('👀 Page visible - welcome back!');
+                // Check if we missed any pings while away
+                if (isAutoPingActive && nextPingTime && Date.now() > nextPingTime + 60000) {
+                    log('⚡ Missed ping detected - triggering immediate ping');
+                    pingAllServices();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

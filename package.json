@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "concurrently \"npm --prefix packages/api run dev\" \"npm --prefix packages/web run dev\"",
     "build": "npm --prefix packages/api run build && npm --prefix packages/web run build",
-    "lint": "npm --prefix packages/api run lint && npm --prefix packages/web run lint"
+    "lint": "npm --prefix packages/api run lint && npm --prefix packages/web run lint",
+    "keep-alive": "node keep-alive.js",
+    "ping": "node -e \"require('./keep-alive.js').pingAllServices()\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
