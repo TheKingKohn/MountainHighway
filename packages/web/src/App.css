@@ -1,34 +1,50 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.4;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .App {
   width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
+/* Header */
 .App-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  color: white;
+  background: white;
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 2rem;
 }
 
 .header-right {
@@ -37,146 +53,436 @@
 }
 
 .App-header h1 {
-  margin: 0;
-  color: white;
-  font-size: 1.5rem;
+  color: #1976d2;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .App-header nav {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .App-header nav a {
-  color: rgba(255, 255, 255, 0.9);
+  color: #666;
   text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 14px;
   font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .App-header nav a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #f0f0f0;
+  color: #1976d2;
+}
+
+/* Mobile-First Marketplace Layout */
+.marketplace-home {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  min-height: calc(100vh - 60px);
+}
+
+/* Quick Actions Bar - Like Facebook Marketplace */
+.quick-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  gap: 8px;
+}
+
+.action-button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border: none;
+  background: none;
+  text-decoration: none;
+  color: #666;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  max-width: 80px;
+}
+
+.action-button:hover {
+  background-color: #f5f5f5;
+}
+
+.action-button.browse {
+  color: #1976d2;
+}
+
+.action-button.sell {
+  color: #4caf50;
+}
+
+.action-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.action-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Welcome Banner with Social Proof */
+.welcome-banner {
+  text-align: center;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
   color: white;
-  transform: translateY(-1px);
+  margin-bottom: 16px;
 }
 
-.api-status {
-  margin: 1rem 0;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+.welcome-banner h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.status-ok {
-  color: #27ae60;
-  font-weight: bold;
+.welcome-banner p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 12px;
 }
 
-.status-error {
-  color: #e74c3c;
-  font-weight: bold;
+.trust-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
+.trust-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Categories Section */
+.categories-section {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.categories-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  background: white;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.category-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.category-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.category-item span {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Psychological Elements - Scarcity & Social Proof */
+.category-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.category-indicator.hot {
+  background: #ff4444;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.category-indicator.new {
+  background: #4caf50;
+  color: white;
+}
+
+.category-indicator.limited {
+  background: #ff9800;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Recent Listings */
+.recent-listings {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.see-all {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.listings-preview {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.preview-card {
+  min-width: 120px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.preview-image {
+  height: 80px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #999;
+}
+
+.preview-info {
+  padding: 8px;
+}
+
+.preview-info h3 {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 2px;
+  color: #333;
+}
+
+.preview-info p {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.was-price {
+  font-size: 11px;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.urgency {
+  font-size: 10px;
+  color: #ff4444;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.view-all-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #f5f5f5;
+  color: #1976d2;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.view-all-button:hover {
+  background: #e3f2fd;
+}
+
+/* Sell CTA */
+.sell-cta {
+  margin: 16px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.sell-cta h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.sell-cta p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #1976d2;
+  color: white;
+  text-decoration: none;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cta-button:hover {
+  background: #1565c0;
+}
+
+.success-stats,
+.social-proof {
+  margin-top: 12px;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.social-proof {
+  color: #666;
+  font-style: italic;
+}
+
+/* Main Content */
 main {
-  padding: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  background: white;
 }
 
 main h2 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  color: #333;
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 main p {
-  color: #7f8c8d;
-  line-height: 1.6;
-}
-
-/* Responsive design for header */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .header-left {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .App-header nav {
-    justify-content: center;
-  }
-  
-  .App-header h1 {
-    font-size: 1.25rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .App-header nav {
-    flex-wrap: wrap;
-    gap: 0.25rem;
-  }
-  
-  .App-header nav a {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-  }
-}
-
-/* Home page styles */
-.home-container {
-  text-align: center;
-  padding: 2rem;
-}
-
-.home-buttons {
-  margin: 2rem 0;
-}
-
-.home-button {
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  text-decoration: none;
-  margin: 0 1rem;
-  display: inline-block;
-  font-weight: bold;
-  transition: transform 0.2s ease;
-}
-
-.home-button:hover {
-  transform: scale(1.05);
-}
-
-.home-button.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.home-button.success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-.home-subtitle {
   color: #666;
-  margin-top: 2rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
 }
 
-.admin-dev-hint {
-  margin-top: 3rem;
-  text-align: center;
-  opacity: 0.6;
-  font-size: 0.85rem;
+/* Responsive Design for Larger Screens */
+@media (min-width: 768px) {
+  .marketplace-home {
+    max-width: 800px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  
+  .quick-actions {
+    justify-content: center;
+    gap: 24px;
+  }
+  
+  .action-button {
+    max-width: 100px;
+  }
+  
+  .listings-preview {
+    justify-content: flex-start;
+  }
+  
+  .preview-card {
+    min-width: 150px;
+  }
+  
+  .preview-image {
+    height: 100px;
+  }
 }
 
-.admin-dev-hint a {
-  color: #667eea;
-  text-decoration: none;
-}
-
-.admin-dev-hint a:hover {
-  text-decoration: underline;
+@media (min-width: 1024px) {
+  .marketplace-home {
+    max-width: 1000px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+  
+  .category-item {
+    padding: 20px 12px;
+  }
+  
+  .category-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  
+  .category-item span {
+    font-size: 14px;
+  }
 }
