@@ -5,8 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc && prisma generate",
+    "build": "tsc --skipLibCheck && prisma generate",
     "start": "prisma migrate deploy && node dist/index.js",
+    "start:prod": "NODE_ENV=production node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
