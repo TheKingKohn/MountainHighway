@@ -66,20 +66,62 @@ router.post('/force-admin-migration', requireAuth, async (req: AuthenticatedRequ
       return;
     }
 
-    // Import RBACService dynamically to avoid import issues
-    const { default: RBACService } = await import('../services/rbac');
+    // Directly assign admin role without importing RBACService
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
     
-    // Trigger admin migration
-    await RBACService.migrateAdminUsers();
-    
-    res.status(200).json({ 
-      message: 'Admin migration completed',
-      userEmail: req.user.email,
-      success: true
-    });
+    try {
+      // Get or create admin role
+      let adminRole = await prisma.role.findUnique({
+        where: { name: 'admin' }
+      });
+
+      if (!adminRole) {
+        adminRole = await prisma.role.create({
+          data: {
+            name: 'admin',
+            description: 'Administrator with full system access',
+            level: 100
+          }
+        });
+      }
+
+      // Check if user already has admin role
+      const existingAssignment = await prisma.roleAssignment.findFirst({
+        where: {
+          userId: req.user.id,
+          roleId: adminRole.id
+        }
+      });
+
+      if (!existingAssignment) {
+        // Assign admin role to user
+        await prisma.roleAssignment.create({
+          data: {
+            userId: req.user.id,
+            roleId: adminRole.id,
+            assignedBy: req.user.id
+          }
+        });
+      }
+
+      await prisma.$disconnect();
+      
+      res.status(200).json({ 
+        message: 'Admin role assigned successfully',
+        userEmail: req.user.email,
+        success: true
+      });
+    } catch (dbError) {
+      await prisma.$disconnect();
+      throw dbError;
+    }
   } catch (error) {
     console.error('Force admin migration error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
