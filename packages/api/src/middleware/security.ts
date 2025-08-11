@@ -127,6 +127,11 @@ export const corsOptions = {
       'http://127.0.0.1:5173',
       'http://127.0.0.1:3000'
     ];
+
+    // In production, also allow any onrender.com subdomain for the web app
+    if (config.NODE_ENV === 'production' && origin && origin.includes('.onrender.com')) {
+      return callback(null, true);
+    }
     
     // In development, allow all localhost origins
     if (config.NODE_ENV === 'development') {
