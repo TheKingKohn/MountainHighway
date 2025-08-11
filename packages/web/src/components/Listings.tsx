@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
 import './Listings.css';
@@ -28,9 +29,15 @@ const Listings: React.FC = () => {
   // Get category from URL parameter
   const selectedCategory = searchParams.get('category') || 'all';
 
+  // Debug logging
+  useEffect(() => {
+    console.log('Listings component - selectedCategory changed:', selectedCategory);
+    console.log('Listings component - searchParams:', Object.fromEntries(searchParams));
+  }, [selectedCategory, searchParams]);
+
   useEffect(() => {
     fetchListings();
-  }, []);
+  }, [selectedCategory]); // Re-fetch when category changes
 
   const fetchListings = async () => {
     try {
@@ -79,12 +86,23 @@ const Listings: React.FC = () => {
     { key: 'services', label: 'Services', icon: '🛠️' }
   ];
 
-  const filteredListings = selectedCategory === 'all' 
-    ? listings 
-    : listings.filter(listing => 
-        listing.title.toLowerCase().includes(selectedCategory) ||
-        listing.description.toLowerCase().includes(selectedCategory)
-      );
+  const filteredListings = React.useMemo(() => {
+    if (selectedCategory === 'all' || !selectedCategory) {
+      return listings;
+    }
+    
+    return listings.filter(listing => {
+      const searchText = selectedCategory.toLowerCase();
+      const titleMatch = listing.title.toLowerCase().includes(searchText);
+      const descriptionMatch = listing.description.toLowerCase().includes(searchText);
+      
+      // Also check for exact category matches
+      const exactMatch = listing.title.toLowerCase().includes(selectedCategory) || 
+                        listing.description.toLowerCase().includes(selectedCategory);
+      
+      return titleMatch || descriptionMatch || exactMatch;
+    });
+  }, [listings, selectedCategory]);
 
   const changeMedia = (listingId: string, direction: number) => {
     const listing = listings.find(l => l.id === listingId);
@@ -174,14 +192,14 @@ const Listings: React.FC = () => {
         <h3>Filter by Category</h3>
         <div className="category-tabs">
           {categories.map(category => (
-            <a
+            <Link
               key={category.key}
-              href={`/listings${category.key === 'all' ? '' : `?category=${category.key}`}`}
+              to={`/listings${category.key === 'all' ? '' : `?category=${category.key}`}`}
               className={`category-tab ${selectedCategory === category.key ? 'active' : ''}`}
             >
               <span className="category-icon">{category.icon}</span>
               <span>{category.label}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

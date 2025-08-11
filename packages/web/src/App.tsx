@@ -91,7 +91,7 @@ function App() {
               <Route path="/community" element={<Community />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/about" element={<About />} />
-              <Route path="*" element={<Home />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
 
@@ -421,6 +421,20 @@ function Community() {
           <div className="feature-item">🏆 Member rewards program</div>
           <div className="feature-item">📊 Advanced analytics</div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function NotFound() {
+  return (
+    <div className="page-container">
+      <div className="not-found">
+        <h2>🔍 Page Not Found</h2>
+        <p>Sorry, the page you're looking for doesn't exist.</p>
+        <Link to="/" className="action-button">
+          🏠 Go Home
+        </Link>
       </div>
     </div>
   )
