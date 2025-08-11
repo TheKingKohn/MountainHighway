@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './UserProfile.css';
 
 interface UserProfileProps {
@@ -7,7 +8,8 @@ interface UserProfileProps {
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({ onAuthClick }) => {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -40,8 +42,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ onAuthClick }) => {
           </div>
           <div className="user-details">
             <span className="user-email">{user.email}</span>
+            {isAdmin && <span className="admin-badge">ADMIN</span>}
           </div>
         </div>
+        {isAdmin && (
+          <button 
+            className="admin-button"
+            onClick={() => navigate('/admin')}
+            aria-label="Access admin panel"
+          >
+            🛠️ Admin
+          </button>
+        )}
         <button 
           className="logout-button"
           onClick={logout}
