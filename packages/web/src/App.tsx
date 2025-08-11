@@ -84,6 +84,7 @@ function App() {
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/about" element={<About />} />
+              <Route path="*" element={<Home />} />
             </Routes>
           </main>
 
