@@ -4,7 +4,7 @@ services:
   - type: web
     name: mountain-highway-api
     runtime: node
-    buildCommand: cd packages/api && npm install && npm run build
+    buildCommand: npm install && npm --prefix packages/api run build
     startCommand: cd packages/api && npm start
     envVars:
       - key: NODE_ENV
@@ -29,7 +29,7 @@ services:
   - type: web
     name: mountain-highway-web
     runtime: static
-    buildCommand: cd packages/web && npm install && npm run build
+    buildCommand: npm install && npm --prefix packages/web run build
     staticPublishPath: packages/web/dist
     envVars:
       - key: VITE_API_BASE_URL
