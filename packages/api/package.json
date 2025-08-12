@@ -8,7 +8,7 @@
     "prebuild": "npx prisma migrate deploy || echo 'Migration failed, continuing...'",
     "build": "npx prisma generate && tsc --noEmitOnError false --skipLibCheck",
     "build:with-prisma": "prisma generate && tsc --noEmitOnError false --skipLibCheck",
-    "start": "prisma db push --accept-data-loss && node dist/index.js",
+    "start": "prisma migrate deploy && node dist/index.js",
     "start:prod": "NODE_ENV=production node dist/index.js",
     "postinstall": "npx prisma generate",
     "test": "jest",
