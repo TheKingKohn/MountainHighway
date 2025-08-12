@@ -29,7 +29,7 @@ model User {
   
   // Timestamps
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  updatedAt       DateTime  @default(now()) @updatedAt
   lastLoginAt     DateTime?
   
   // Relations
@@ -116,7 +116,7 @@ model Role {
   isSystem    Boolean  @default(false) // System roles cannot be deleted
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now()) @updatedAt
   
   // Relations
   assignments RoleAssignment[]
@@ -195,7 +195,7 @@ model CommunityPost {
   type      String   @default("discussion") // "discussion", "trade_request", "local_event", "review"
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   
   // Relations
   author    User               @relation(fields: [authorId], references: [id])
@@ -211,7 +211,7 @@ model CommunityComment {
   postId    String
   authorId  String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   
   // Relations
   post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
