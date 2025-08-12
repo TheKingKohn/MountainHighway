@@ -9,6 +9,7 @@ import CreateListing from './components/CreateListing'
 import ListingsPage from './components/Listings'
 import AdminPanel from './components/AdminPanel'
 import Community from './components/Community'
+import Profile from './components/Profile'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
@@ -90,6 +91,7 @@ function App() {
               <Route path="/listings" element={<ListingsPage />} />
               <Route path="/create-listing" element={<CreateListing />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />

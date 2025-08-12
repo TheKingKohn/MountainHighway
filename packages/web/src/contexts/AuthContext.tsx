@@ -8,6 +8,7 @@ interface User {
   email: string;
   stripeAccountId?: string | null;
   isAdmin?: boolean;
+  createdAt?: string;
 }
 
 interface AuthContextType {

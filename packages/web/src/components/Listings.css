@@ -366,3 +366,172 @@
     font-size: 1.5rem;
   }
 }
+
+/* Listing Details and Badges */
+.listing-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.listing-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.listing-badge.category {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.listing-badge.condition {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.listing-badge.brand {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.listing-badge.location {
+  background: #f3e8ff;
+  color: #6b21a8;
+}
+
+/* No Results State */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
+}
+
+.no-results h3 {
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.create-listing-btn {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.create-listing-btn:hover {
+  background: #0052a3;
+}
+
+/* Enhanced Media Controls */
+.media-controls {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.media-nav {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.media-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.media-indicator {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Button Enhancements */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  border: none;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: 1px solid #3b82f6;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.btn-secondary {
+  background: #f9fafb;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Responsive Design Updates for New Elements */
+@media (max-width: 768px) {
+  .listing-details {
+    margin: 0.5rem 0;
+  }
+  
+  .listing-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .listing-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .media-controls {
+    bottom: 0.25rem;
+    right: 0.25rem;
+    padding: 0.2rem 0.4rem;
+  }
+  
+  .media-nav {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+}

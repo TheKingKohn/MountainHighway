@@ -2,9 +2,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// PostgreSQL for production deployment  
+// SQLite for development, PostgreSQL for production
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -56,10 +56,16 @@ model Listing {
   title       String
   description String
   priceCents  Int
+  category    String   @default("other") // "electronics", "fashion", "home", "collectibles", "automotive", "services", "other"
+  subcategory String?  // Optional subcategory like "smartphones", "laptops", etc.
+  condition   String   @default("good") // "new", "like_new", "good", "fair", "poor"
+  brand       String?  // Optional brand name
+  location    String?  // Optional location/area
   photos      String // JSON array of photo file paths (TEXT in both SQLite and PostgreSQL)
   video       String? // Optional video file path
   status      String   @default("ACTIVE")
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   seller      User     @relation(fields: [sellerId], references: [id])
   orders      Order[]
 

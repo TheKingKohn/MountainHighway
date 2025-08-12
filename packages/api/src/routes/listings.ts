@@ -12,13 +12,23 @@ const router = Router();
 const createListingSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(2000),
-  priceCents: z.coerce.number().int().positive()
+  priceCents: z.coerce.number().int().positive(),
+  category: z.enum(['electronics', 'fashion', 'home', 'collectibles', 'automotive', 'services', 'other']).default('other'),
+  subcategory: z.string().max(100).optional(),
+  condition: z.enum(['new', 'like_new', 'good', 'fair', 'poor']).default('good'),
+  brand: z.string().max(100).optional(),
+  location: z.string().max(200).optional()
 });
 
 const updateListingSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().min(1).max(2000).optional(),
   priceCents: z.coerce.number().int().positive().optional(),
+  category: z.enum(['electronics', 'fashion', 'home', 'collectibles', 'automotive', 'services', 'other']).optional(),
+  subcategory: z.string().max(100).optional(),
+  condition: z.enum(['new', 'like_new', 'good', 'fair', 'poor']).optional(),
+  brand: z.string().max(100).optional(),
+  location: z.string().max(200).optional(),
   status: z.enum(['ACTIVE', 'INACTIVE', 'SOLD']).optional()
 });
 
@@ -39,7 +49,7 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
     }
     
     // Parse form data
-    const { title, description, priceCents } = createListingSchema.parse(req.body);
+    const { title, description, priceCents, category, subcategory, condition, brand, location } = createListingSchema.parse(req.body);
     
     // Process uploaded files
     const files = reqAny.files as any;
@@ -65,6 +75,11 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
         title,
         description,
         priceCents,
+        category,
+        subcategory: subcategory || null,
+        condition,
+        brand: brand || null,
+        location: location || null,
         photos: JSON.stringify(photoPaths),
         video: videoPath,
         status: 'ACTIVE'
@@ -90,6 +105,11 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
         title: listing.title,
         description: listing.description,
         priceCents: listing.priceCents,
+        category: listing.category,
+        subcategory: listing.subcategory,
+        condition: listing.condition,
+        brand: listing.brand,
+        location: listing.location,
         photos: photoUrls,
         video: videoUrl,
         status: listing.status,
@@ -128,15 +148,21 @@ router.post('/', requireAuth, uploadListingFiles, async (req: AuthenticatedReque
   }
 });
 
-// GET /listings - List all active listings
+// GET /listings - List all active listings with enhanced search and filtering
 router.get('/', async (req, res) => {
   try {
     const { 
       limit = '20', 
       offset = '0', 
       search,
+      category,
+      condition,
+      brand,
+      location,
       minPrice,
-      maxPrice 
+      maxPrice,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
     } = req.query;
 
     const limitNum = Math.min(parseInt(limit as string) || 20, 100);
@@ -147,12 +173,33 @@ router.get('/', async (req, res) => {
       status: 'ACTIVE'
     };
 
-    // Add search filter
+    // Add search filter (searches in title, description, brand)
     if (search) {
       where.OR = [
-        { title: { contains: search as string } },
-        { description: { contains: search as string } }
+        { title: { contains: search as string, mode: 'insensitive' } },
+        { description: { contains: search as string, mode: 'insensitive' } },
+        { brand: { contains: search as string, mode: 'insensitive' } }
       ];
+    }
+
+    // Add category filter
+    if (category && category !== 'all') {
+      where.category = category as string;
+    }
+
+    // Add condition filter
+    if (condition) {
+      where.condition = condition as string;
+    }
+
+    // Add brand filter
+    if (brand) {
+      where.brand = { contains: brand as string, mode: 'insensitive' };
+    }
+
+    // Add location filter
+    if (location) {
+      where.location = { contains: location as string, mode: 'insensitive' };
     }
 
     // Add price filters
@@ -161,6 +208,13 @@ router.get('/', async (req, res) => {
       if (minPrice) where.priceCents.gte = parseInt(minPrice as string);
       if (maxPrice) where.priceCents.lte = parseInt(maxPrice as string);
     }
+
+    // Build order by clause
+    const orderBy: any = {};
+    const validSortFields = ['createdAt', 'priceCents', 'title'];
+    const sortField = validSortFields.includes(sortBy as string) ? sortBy as string : 'createdAt';
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
+    orderBy[sortField] = order;
 
     const [listings, total] = await Promise.all([
       prisma.listing.findMany({
@@ -173,9 +227,7 @@ router.get('/', async (req, res) => {
             }
           }
         },
-        orderBy: {
-          createdAt: 'desc'
-        },
+        orderBy,
         take: limitNum,
         skip: offsetNum
       }),
@@ -184,9 +236,26 @@ router.get('/', async (req, res) => {
 
     // Parse photos and convert to URLs for all listings
     const listingsWithUrls = listings.map(listing => {
-      const photoPaths = JSON.parse(listing.photos) as string[];
+      let photoPaths: string[] = [];
+      
+      // Handle photos field - it might be a JSON string or already parsed
+      if (listing.photos) {
+        try {
+          // If it's a string, parse it as JSON
+          if (typeof listing.photos === 'string') {
+            photoPaths = JSON.parse(listing.photos);
+          } else {
+            // If it's already an array, use it directly
+            photoPaths = listing.photos as any;
+          }
+        } catch (e) {
+          console.error('Error parsing photos for listing', listing.id, ':', e);
+          photoPaths = [];
+        }
+      }
+      
       const photoUrls = photoPaths.map(path => getFileUrl(path, req));
-      const videoUrl = (listing as any).video ? getFileUrl((listing as any).video, req) : null;
+      const videoUrl = listing.video ? getFileUrl(listing.video, req) : null;
       
       return {
         ...listing,
@@ -203,6 +272,17 @@ router.get('/', async (req, res) => {
         limit: limitNum,
         offset: offsetNum,
         hasMore: offsetNum + limitNum < total
+      },
+      filters: {
+        search: search || null,
+        category: category || null,
+        condition: condition || null,
+        brand: brand || null,
+        location: location || null,
+        minPrice: minPrice ? parseInt(minPrice as string) : null,
+        maxPrice: maxPrice ? parseInt(maxPrice as string) : null,
+        sortBy: sortField,
+        sortOrder: order
       }
     });
   } catch (error) {
@@ -210,6 +290,84 @@ router.get('/', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch listings'
+    });
+  }
+});
+
+// GET /listings/filters - Get available filter options
+router.get('/filters', async (req, res) => {
+  try {
+    // Get unique categories, conditions, brands, and locations from active listings
+    const [categories, conditions, brands, locations] = await Promise.all([
+      prisma.listing.findMany({
+        where: { status: 'ACTIVE' },
+        select: { category: true },
+        distinct: ['category']
+      }),
+      prisma.listing.findMany({
+        where: { status: 'ACTIVE' },
+        select: { condition: true },
+        distinct: ['condition']
+      }),
+      prisma.listing.findMany({
+        where: { 
+          status: 'ACTIVE',
+          brand: { not: null }
+        },
+        select: { brand: true },
+        distinct: ['brand']
+      }),
+      prisma.listing.findMany({
+        where: { 
+          status: 'ACTIVE',
+          location: { not: null }
+        },
+        select: { location: true },
+        distinct: ['location']
+      })
+    ]);
+
+    // Get price range
+    const priceStats = await prisma.listing.aggregate({
+      where: { status: 'ACTIVE' },
+      _min: { priceCents: true },
+      _max: { priceCents: true },
+      _avg: { priceCents: true }
+    });
+
+    res.json({
+      success: true,
+      filters: {
+        categories: [
+          { value: 'electronics', label: 'Electronics', icon: '📱' },
+          { value: 'fashion', label: 'Fashion', icon: '👕' },
+          { value: 'home', label: 'Home & Garden', icon: '🏠' },
+          { value: 'collectibles', label: 'Collectibles', icon: '🎨' },
+          { value: 'automotive', label: 'Automotive', icon: '🚗' },
+          { value: 'services', label: 'Services', icon: '🛠️' },
+          { value: 'other', label: 'Other', icon: '📦' }
+        ],
+        conditions: [
+          { value: 'new', label: 'New' },
+          { value: 'like_new', label: 'Like New' },
+          { value: 'good', label: 'Good' },
+          { value: 'fair', label: 'Fair' },
+          { value: 'poor', label: 'Poor' }
+        ],
+        brands: brands.map(b => b.brand).filter(Boolean).sort(),
+        locations: locations.map(l => l.location).filter(Boolean).sort(),
+        priceRange: {
+          min: priceStats._min.priceCents || 0,
+          max: priceStats._max.priceCents || 100000,
+          average: Math.round(priceStats._avg.priceCents || 0)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching filter options:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch filter options'
     });
   }
 });

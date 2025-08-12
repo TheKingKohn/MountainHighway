@@ -6,9 +6,6 @@ import './Listings.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-// Valid categories - should match backend validation
-const VALID_CATEGORIES = ['all', 'electronics', 'clothing', 'sports', 'collectibles', 'other'];
-
 interface Listing {
   id: string;
   title: string;
@@ -32,29 +29,16 @@ const Listings: React.FC = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMediaIndex, setCurrentMediaIndex] = useState<{[key: string]: number}>({});
-  const [filters, setFilters] = useState<FilterState>(() => {
-    // Validate category from URL
-    const categoryParam = searchParams.get('category') || 'all';
-    const validCategory = VALID_CATEGORIES.includes(categoryParam) ? categoryParam : 'all';
-    
-    // If invalid category was provided, redirect to valid one
-    if (categoryParam !== validCategory) {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.set('category', validCategory);
-      window.history.replaceState({}, '', `${window.location.pathname}?${newParams}`);
-    }
-    
-    return {
-      search: searchParams.get('search') || '',
-      category: validCategory,
-      condition: searchParams.get('condition') || '',
-      brand: searchParams.get('brand') || '',
-      location: searchParams.get('location') || '',
-      minPrice: searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : null,
-      maxPrice: searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : null,
-      sortBy: searchParams.get('sortBy') || 'createdAt',
-      sortOrder: searchParams.get('sortOrder') || 'desc'
-    };
+  const [filters, setFilters] = useState<FilterState>({
+    search: searchParams.get('search') || '',
+    category: searchParams.get('category') || 'all',
+    condition: searchParams.get('condition') || '',
+    brand: searchParams.get('brand') || '',
+    location: searchParams.get('location') || '',
+    minPrice: searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : null,
+    maxPrice: searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : null,
+    sortBy: searchParams.get('sortBy') || 'createdAt',
+    sortOrder: searchParams.get('sortOrder') || 'desc'
   });
 
   // Handle filter changes
@@ -372,28 +356,7 @@ const Listings: React.FC = () => {
       {listings.length === 0 && !loading && (
         <div className="no-results">
           <h3>No listings found</h3>
-          {filters.category && filters.category !== 'all' ? (
-            <div>
-              <p>No items found in the <strong>{filters.category}</strong> category.</p>
-              <p>Be the first to list an item in this category!</p>
-              <button 
-                className="create-listing-btn"
-                onClick={() => window.location.href = '/create-listing'}
-              >
-                Create First Listing
-              </button>
-            </div>
-          ) : filters.search ? (
-            <div>
-              <p>No results found for "<strong>{filters.search}</strong>"</p>
-              <p>Try different keywords or browse all categories.</p>
-            </div>
-          ) : (
-            <div>
-              <p>No listings available right now.</p>
-              <p>Check back later or be the first to create a listing!</p>
-            </div>
-          )}
+          <p>Try adjusting your search filters or check back later.</p>
         </div>
       )}
     </div>
